@@ -1,0 +1,1443 @@
+import { useState } from 'react';
+import { Plus, Trash2, Target, Flame, Award, Zap, Home, Dumbbell, Calendar, User, Play, Clock, TrendingUp, ChevronRight, Camera, BookOpen, BarChart3, Utensils, Crown, Heart, Activity, Coffee, Image } from 'lucide-react';
+
+export default function FitnessApp() {
+  const [currentPage, setCurrentPage] = useState('onboarding');
+  const [onboardingStep, setOnboardingStep] = useState(0);
+  const [meals, setMeals] = useState([]);
+  const [foodName, setFoodName] = useState('');
+  const [calories, setCalories] = useState('');
+  const [mealType, setMealType] = useState('breakfast');
+  const [dailyGoal, setDailyGoal] = useState(2000);
+  const [showForm, setShowForm] = useState(false);
+  const [completedWorkouts, setCompletedWorkouts] = useState([]);
+  const [isPremium, setIsPremium] = useState(false);
+  const [waterIntake, setWaterIntake] = useState(0);
+  const [showPhotoOption, setShowPhotoOption] = useState(false);
+  
+  // Onboarding data
+  const [userData, setUserData] = useState({
+    weight: '',
+    height: '',
+    goal: '',
+    targetWeight: '',
+    age: '',
+    gender: ''
+  });
+
+  const handleUserDataChange = (field, value) => {
+    setUserData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const workoutPlans = [
+    {
+      id: 1,
+      name: 'Beginner Full Body',
+      duration: '20 min',
+      calories: '150 cal',
+      difficulty: 'Beginner',
+      image: '🌱',
+      exercises: [
+        { name: 'Wall Push-ups', sets: '3x10', rest: '45s' },
+        { name: 'Bodyweight Squats', sets: '3x12', rest: '45s' },
+        { name: 'Assisted Lunges', sets: '2x8', rest: '60s' },
+        { name: 'Knee Push-ups', sets: '3x8', rest: '45s' },
+        { name: 'Plank Hold', sets: '3x20s', rest: '30s' }
+      ]
+    },
+    {
+      id: 2,
+      name: 'Beginner Cardio',
+      duration: '15 min',
+      calories: '120 cal',
+      difficulty: 'Beginner',
+      image: '🚶',
+      exercises: [
+        { name: 'March in Place', sets: '3x30s', rest: '30s' },
+        { name: 'Step Touches', sets: '3x20', rest: '30s' },
+        { name: 'Arm Circles', sets: '2x15', rest: '20s' },
+        { name: 'Standing Knee Raises', sets: '3x12', rest: '30s' },
+        { name: 'Walking Lunges', sets: '2x10', rest: '45s' }
+      ]
+    },
+    {
+      id: 3,
+      name: 'Push-ups Mastery',
+      duration: '25 min',
+      calories: '180 cal',
+      difficulty: 'Intermediate',
+      image: '🔥',
+      exercises: [
+        { name: 'Standard Push-ups', sets: '4x12', rest: '60s' },
+        { name: 'Wide Push-ups', sets: '3x10', rest: '60s' },
+        { name: 'Diamond Push-ups', sets: '3x8', rest: '60s' },
+        { name: 'Decline Push-ups', sets: '3x10', rest: '60s' },
+        { name: 'Pike Push-ups', sets: '3x8', rest: '60s' }
+      ]
+    },
+    {
+      id: 4,
+      name: 'Pull-ups & Back',
+      duration: '30 min',
+      calories: '220 cal',
+      difficulty: 'Intermediate',
+      image: '💪',
+      exercises: [
+        { name: 'Pull-ups', sets: '4x6', rest: '90s' },
+        { name: 'Chin-ups', sets: '3x8', rest: '90s' },
+        { name: 'Australian Pull-ups', sets: '3x12', rest: '60s' },
+        { name: 'Hanging Knee Raises', sets: '3x10', rest: '60s' },
+        { name: 'Dead Hang', sets: '3x30s', rest: '45s' }
+      ]
+    },
+    {
+      id: 5,
+      name: 'Calisthenics Basics',
+      duration: '35 min',
+      calories: '250 cal',
+      difficulty: 'Intermediate',
+      image: '🤸',
+      exercises: [
+        { name: 'Push-ups', sets: '4x15', rest: '60s' },
+        { name: 'Pull-ups', sets: '4x8', rest: '90s' },
+        { name: 'Dips', sets: '3x10', rest: '60s' },
+        { name: 'Pistol Squats (Assisted)', sets: '3x6', rest: '60s' },
+        { name: 'L-sit Hold', sets: '3x15s', rest: '45s' }
+      ]
+    },
+    {
+      id: 6,
+      name: 'Advanced Calisthenics',
+      duration: '40 min',
+      calories: '300 cal',
+      difficulty: 'Advanced',
+      image: '⚡',
+      exercises: [
+        { name: 'Muscle-ups', sets: '4x5', rest: '120s' },
+        { name: 'Handstand Push-ups', sets: '4x8', rest: '90s' },
+        { name: 'Pistol Squats', sets: '3x10', rest: '60s' },
+        { name: 'Front Lever Hold', sets: '3x10s', rest: '90s' },
+        { name: 'Planche Progressions', sets: '3x20s', rest: '90s' }
+      ]
+    },
+    {
+      id: 7,
+      name: 'Full Body Strength',
+      duration: '45 min',
+      calories: '350 cal',
+      difficulty: 'Intermediate',
+      image: '💥',
+      exercises: [
+        { name: 'Squats', sets: '4x12', rest: '60s' },
+        { name: 'Push-ups', sets: '3x15', rest: '45s' },
+        { name: 'Deadlifts', sets: '4x10', rest: '90s' },
+        { name: 'Pull-ups', sets: '3x8', rest: '60s' },
+        { name: 'Plank', sets: '3x60s', rest: '30s' }
+      ]
+    },
+    {
+      id: 8,
+      name: 'HIIT Cardio Blast',
+      duration: '30 min',
+      calories: '400 cal',
+      difficulty: 'Advanced',
+      image: '🔥',
+      exercises: [
+        { name: 'Burpees', sets: '4x20', rest: '30s' },
+        { name: 'Mountain Climbers', sets: '4x30', rest: '20s' },
+        { name: 'Jump Squats', sets: '4x15', rest: '30s' },
+        { name: 'High Knees', sets: '4x40s', rest: '20s' },
+        { name: 'Box Jumps', sets: '3x12', rest: '45s' }
+      ]
+    },
+    {
+      id: 9,
+      name: 'Core & Abs Builder',
+      duration: '25 min',
+      calories: '200 cal',
+      difficulty: 'Beginner',
+      image: '🎯',
+      exercises: [
+        { name: 'Crunches', sets: '3x20', rest: '30s' },
+        { name: 'Russian Twists', sets: '3x30', rest: '30s' },
+        { name: 'Leg Raises', sets: '3x15', rest: '45s' },
+        { name: 'Bicycle Crunches', sets: '3x25', rest: '30s' },
+        { name: 'Side Plank', sets: '2x45s', rest: '30s' }
+      ]
+    },
+    {
+      id: 10,
+      name: 'Upper Body Calisthenics',
+      duration: '35 min',
+      calories: '280 cal',
+      difficulty: 'Intermediate',
+      image: '💪',
+      exercises: [
+        { name: 'Wide Push-ups', sets: '4x12', rest: '60s' },
+        { name: 'Chin-ups', sets: '4x8', rest: '90s' },
+        { name: 'Tricep Dips', sets: '4x12', rest: '60s' },
+        { name: 'Pike Push-ups', sets: '3x10', rest: '60s' },
+        { name: 'Inverted Rows', sets: '3x12', rest: '60s' }
+      ]
+    },
+    {
+      id: 11,
+      name: 'Lower Body Power',
+      duration: '40 min',
+      calories: '320 cal',
+      difficulty: 'Intermediate',
+      image: '🦵',
+      exercises: [
+        { name: 'Jump Squats', sets: '4x15', rest: '60s' },
+        { name: 'Bulgarian Split Squats', sets: '3x12', rest: '60s' },
+        { name: 'Walking Lunges', sets: '3x20', rest: '45s' },
+        { name: 'Calf Raises', sets: '4x20', rest: '30s' },
+        { name: 'Wall Sit', sets: '3x45s', rest: '60s' }
+      ]
+    },
+    {
+      id: 12,
+      name: 'Flexibility & Mobility',
+      duration: '30 min',
+      calories: '120 cal',
+      difficulty: 'Beginner',
+      image: '🧘',
+      exercises: [
+        { name: 'Sun Salutation', sets: '5 rounds', rest: '30s' },
+        { name: 'Warrior Poses', sets: '3x45s', rest: '15s' },
+        { name: 'Downward Dog', sets: '3x60s', rest: '20s' },
+        { name: 'Tree Pose', sets: '2x45s', rest: '15s' },
+        { name: 'Savasana', sets: '1x5min', rest: '-' }
+      ]
+    },
+    {
+      id: 13,
+      name: 'Bodyweight Circuit',
+      duration: '30 min',
+      calories: '260 cal',
+      difficulty: 'Intermediate',
+      image: '🔄',
+      exercises: [
+        { name: 'Push-ups', sets: '3x12', rest: '30s' },
+        { name: 'Squats', sets: '3x15', rest: '30s' },
+        { name: 'Mountain Climbers', sets: '3x20', rest: '30s' },
+        { name: 'Plank', sets: '3x45s', rest: '30s' },
+        { name: 'Jumping Jacks', sets: '3x30', rest: '30s' }
+      ]
+    },
+    {
+      id: 14,
+      name: 'Leg Day Crusher',
+      duration: '50 min',
+      calories: '380 cal',
+      difficulty: 'Advanced',
+      image: '🔥',
+      exercises: [
+        { name: 'Barbell Squats', sets: '5x8', rest: '120s' },
+        { name: 'Leg Press', sets: '4x12', rest: '90s' },
+        { name: 'Lunges', sets: '3x12', rest: '60s' },
+        { name: 'Leg Curls', sets: '3x15', rest: '45s' },
+        { name: 'Calf Raises', sets: '4x20', rest: '30s' }
+      ]
+    },
+    {
+      id: 15,
+      name: 'Morning Energizer',
+      duration: '15 min',
+      calories: '100 cal',
+      difficulty: 'Beginner',
+      image: '☀️',
+      exercises: [
+        { name: 'Arm Swings', sets: '2x15', rest: '20s' },
+        { name: 'Bodyweight Squats', sets: '3x10', rest: '30s' },
+        { name: 'Standing Twists', sets: '2x20', rest: '20s' },
+        { name: 'Cat-Cow Stretch', sets: '2x10', rest: '20s' },
+        { name: 'Light Jog in Place', sets: '2x30s', rest: '30s' }
+      ]
+    },
+    {
+      id: 16,
+      name: 'Chest & Triceps',
+      duration: '35 min',
+      calories: '270 cal',
+      difficulty: 'Intermediate',
+      image: '💪',
+      exercises: [
+        { name: 'Regular Push-ups', sets: '4x15', rest: '60s' },
+        { name: 'Wide Push-ups', sets: '3x12', rest: '60s' },
+        { name: 'Diamond Push-ups', sets: '3x10', rest: '60s' },
+        { name: 'Bench Dips', sets: '4x12', rest: '60s' },
+        { name: 'Tricep Push-ups', sets: '3x10', rest: '60s' }
+      ]
+    },
+    {
+      id: 17,
+      name: 'Abs Shredder',
+      duration: '20 min',
+      calories: '160 cal',
+      difficulty: 'Intermediate',
+      image: '🔥',
+      exercises: [
+        { name: 'Bicycle Crunches', sets: '4x30', rest: '30s' },
+        { name: 'Plank to Pike', sets: '3x12', rest: '45s' },
+        { name: 'Russian Twists', sets: '4x40', rest: '30s' },
+        { name: 'Hollow Body Hold', sets: '3x30s', rest: '45s' },
+        { name: 'V-ups', sets: '3x15', rest: '45s' }
+      ]
+    },
+    {
+      id: 18,
+      name: 'Dynamic Stretching',
+      duration: '20 min',
+      calories: '80 cal',
+      difficulty: 'Beginner',
+      image: '🤸',
+      exercises: [
+        { name: 'Leg Swings', sets: '2x15', rest: '20s' },
+        { name: 'Hip Circles', sets: '2x10', rest: '20s' },
+        { name: 'Arm Circles', sets: '2x20', rest: '20s' },
+        { name: 'Torso Twists', sets: '2x15', rest: '20s' },
+        { name: 'Ankle Rotations', sets: '2x10', rest: '20s' }
+      ]
+    }
+  ];
+
+  const recipes = [
+    { id: 1, name: 'Grilled Chicken Salad', calories: 320, protein: 35, carbs: 12, fat: 15, image: '🥗', time: '15 min' },
+    { id: 2, name: 'Oatmeal with Berries', calories: 280, protein: 8, carbs: 45, fat: 7, image: '🥣', time: '10 min' },
+    { id: 3, name: 'Salmon with Veggies', calories: 420, protein: 38, carbs: 18, fat: 22, image: '🐟', time: '25 min' },
+    { id: 4, name: 'Protein Smoothie', calories: 250, protein: 25, carbs: 30, fat: 5, image: '🥤', time: '5 min' },
+    { id: 5, name: 'Quinoa Bowl', calories: 380, protein: 15, carbs: 52, fat: 12, image: '🍲', time: '20 min' },
+    { id: 6, name: 'Greek Yogurt Parfait', calories: 220, protein: 18, carbs: 28, fat: 4, image: '🍨', time: '5 min' }
+  ];
+
+  const mealPlans = [
+    { id: 1, name: 'High Protein Plan', description: 'Build muscle with 40% protein', calories: 2200, image: '💪' },
+    { id: 2, name: 'Balanced Diet', description: 'Perfect macro balance', calories: 2000, image: '⚖️' },
+    { id: 3, name: 'Low Carb Plan', description: 'Keto-friendly meals', calories: 1800, image: '🥑' },
+    { id: 4, name: 'Vegan Power', description: 'Plant-based nutrition', calories: 1900, image: '🌱' }
+  ];
+
+  const [selectedWorkout, setSelectedWorkout] = useState(null);
+
+  const calculateCalorieGoal = () => {
+    if (!userData.weight || !userData.height || !userData.age) return 2000;
+    
+    let bmr;
+    const weight = parseFloat(userData.weight);
+    const height = parseFloat(userData.height);
+    const age = parseFloat(userData.age);
+    
+    if (userData.gender === 'male') {
+      bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+    } else {
+      bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+    }
+    
+    let goal = Math.round(bmr * 1.375);
+    
+    if (userData.goal === 'loss') {
+      goal -= 500;
+    } else if (userData.goal === 'gain') {
+      goal += 500;
+    }
+    
+    return goal;
+  };
+
+  const completeOnboarding = () => {
+    const calculatedGoal = calculateCalorieGoal();
+    setDailyGoal(calculatedGoal);
+    setCurrentPage('home');
+  };
+
+  const addMeal = () => {
+    if (foodName && calories) {
+      setMeals([...meals, {
+        id: Date.now(),
+        name: foodName,
+        calories: parseInt(calories),
+        type: mealType,
+        time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+      }]);
+      setFoodName('');
+      setCalories('');
+      setShowForm(false);
+      setShowPhotoOption(false);
+    }
+  };
+
+  const deleteMeal = (id) => {
+    setMeals(meals.filter(m => m.id !== id));
+  };
+
+  const addWater = () => {
+    setWaterIntake(waterIntake + 250);
+  };
+
+  const totalCalories = meals.reduce((sum, meal) => sum + meal.calories, 0);
+  const remaining = dailyGoal - totalCalories;
+  const progress = (totalCalories / dailyGoal) * 100;
+
+  const getMealColor = (type) => {
+    switch(type) {
+      case 'breakfast': return 'from-orange-500 to-red-500';
+      case 'lunch': return 'from-emerald-400 to-teal-500';
+      case 'dinner': return 'from-violet-400 to-purple-500';
+      default: return 'from-blue-400 to-cyan-500';
+    }
+  };
+
+  const getMealEmoji = (type) => {
+    switch(type) {
+      case 'breakfast': return '🌅';
+      case 'lunch': return '☀️';
+      case 'dinner': return '🌙';
+      default: return '🍎';
+    }
+  };
+
+  const getDifficultyColor = (difficulty) => {
+    switch(difficulty) {
+      case 'Beginner': return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+      case 'Intermediate': return 'bg-orange-500/20 text-orange-300 border-orange-500/30';
+      case 'Advanced': return 'bg-red-500/20 text-red-300 border-red-500/30';
+      default: return 'bg-blue-500/20 text-blue-300 border-blue-500/30';
+    }
+  };
+
+  const completeWorkout = (workoutId) => {
+    if (!completedWorkouts.includes(workoutId)) {
+      setCompletedWorkouts([...completedWorkouts, workoutId]);
+    }
+  };
+
+  // Onboarding Page
+  const OnboardingPage = () => {
+    if (onboardingStep === 0) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-4">
+          <div className="max-w-md w-full space-y-8 text-center">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-red-600/20 via-orange-600/20 to-red-600/20 blur-3xl"></div>
+              <div className="relative">
+                <h1 className="text-6xl font-bold mb-4">
+                  <span className="bg-gradient-to-r from-red-500 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                    Start
+                  </span>
+                  <span className="text-white"> building</span>
+                </h1>
+                <h2 className="text-5xl font-bold text-white mb-6">
+                  wellness people<br/>remember.
+                </h2>
+                <p className="text-gray-300 text-lg mb-8 max-w-lg mx-auto">
+                  Transform your health journey with personalized tracking, expert guidance, and a community that supports you.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setOnboardingStep(1)}
+              className="bg-white text-black font-bold py-4 px-8 rounded-xl hover:bg-gray-100 transition-all transform hover:scale-105"
+            >
+              Get Started
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    if (onboardingStep === 1) {
+      return (
+        <div className="space-y-6 pb-24">
+          <h2 className="text-3xl font-bold text-white mb-6">Tell us about yourself</h2>
+          <div className="space-y-4">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+              <label className="block text-sm text-gray-300 mb-2">Age</label>
+              <input
+                type="number"
+                value={userData.age}
+                onChange={(e) => setUserData({...userData, age: e.target.value})}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                placeholder="25"
+              />
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+              <label className="block text-sm text-gray-300 mb-2">Gender</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setUserData({...userData, gender: 'male'})}
+                  className={`py-3 rounded-xl font-semibold transition-all ${
+                    userData.gender === 'male'
+                      ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
+                      : 'bg-black/30 text-gray-300 border border-white/20'
+                  }`}
+                >
+                  Male
+                </button>
+                <button
+                  onClick={() => setUserData({...userData, gender: 'female'})}
+                  className={`py-3 rounded-xl font-semibold transition-all ${
+                    userData.gender === 'female'
+                      ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
+                      : 'bg-black/30 text-gray-300 border border-white/20'
+                  }`}
+                >
+                  Female
+                </button>
+              </div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+              <label className="block text-sm text-gray-300 mb-2">Current Weight (kg)</label>
+              <input
+                type="number"
+                value={userData.weight}
+                onChange={(e) => setUserData({...userData, weight: e.target.value})}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                placeholder="70"
+              />
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+              <label className="block text-sm text-gray-300 mb-2">Height (cm)</label>
+              <input
+                type="number"
+                value={userData.height}
+                onChange={(e) => setUserData({...userData, height: e.target.value})}
+                className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                placeholder="170"
+              />
+            </div>
+          </div>
+          <button
+            onClick={() => setOnboardingStep(2)}
+            disabled={!userData.age || !userData.gender || !userData.weight || !userData.height}
+            className="w-full bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Continue
+          </button>
+        </div>
+      );
+    }
+
+    if (onboardingStep === 2) {
+      return (
+        <div className="space-y-6 pb-24">
+          <h2 className="text-3xl font-bold text-white mb-6">What's your goal?</h2>
+          <div className="space-y-4">
+            <button
+              onClick={() => setUserData({...userData, goal: 'loss'})}
+              className={`w-full p-6 rounded-2xl border-2 transition-all ${
+                userData.goal === 'loss'
+                  ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500'
+                  : 'bg-white/10 border-white/20'
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">📉</div>
+                <div className="text-left">
+                  <h3 className="text-xl font-bold text-white">Lose Weight</h3>
+                  <p className="text-sm text-gray-300">Reduce body fat and get leaner</p>
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setUserData({...userData, goal: 'maintain'})}
+              className={`w-full p-6 rounded-2xl border-2 transition-all ${
+                userData.goal === 'maintain'
+                  ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500'
+                  : 'bg-white/10 border-white/20'
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">⚖️</div>
+                <div className="text-left">
+                  <h3 className="text-xl font-bold text-white">Maintain Weight</h3>
+                  <p className="text-sm text-gray-300">Stay healthy at current weight</p>
+                </div>
+              </div>
+            </button>
+            <button
+              onClick={() => setUserData({...userData, goal: 'gain'})}
+              className={`w-full p-6 rounded-2xl border-2 transition-all ${
+                userData.goal === 'gain'
+                  ? 'bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500'
+                  : 'bg-white/10 border-white/20'
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">📈</div>
+                <div className="text-left">
+                  <h3 className="text-xl font-bold text-white">Gain Weight</h3>
+                  <p className="text-sm text-gray-300">Build muscle and strength</p>
+                </div>
+              </div>
+            </button>
+          </div>
+          {userData.goal && (
+            <>
+              <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <label className="block text-sm text-gray-300 mb-2">Target Weight (kg)</label>
+                <input
+                  type="number"
+                  value={userData.targetWeight}
+                  onChange={(e) => setUserData({...userData, targetWeight: e.target.value})}
+                  className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+                  placeholder="65"
+                />
+              </div>
+              <button
+                onClick={completeOnboarding}
+                disabled={!userData.targetWeight}
+                className="w-full bg-gradient-to-r from-red-500 via-orange-500 to-red-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg transform hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Complete Setup
+              </button>
+            </>
+          )}
+        </div>
+      );
+    }
+  };
+
+  // Home Page
+  const HomePage = () => (
+    <div className="space-y-6 pb-24">
+      <div className="text-center mb-8">
+        <div className="inline-block p-4 bg-gradient-to-br from-red-500 via-orange-500 to-red-600 rounded-3xl shadow-2xl mb-4 transform hover:scale-110 transition-transform duration-300">
+          <Flame className="w-12 h-12 text-white animate-pulse" />
+        </div>
+        <h1 className="text-4xl font-bold text-white mb-2">FitLife Pro</h1>
+        <p className="text-gray-300">Track. Train. Transform.</p>
+      </div>
+
+      {/* Premium Banner */}
+      {!isPremium && (
+        <div className="bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 rounded-3xl p-6 border-2 border-orange-400 shadow-2xl transform hover:scale-105 transition-all cursor-pointer" onClick={() => setCurrentPage('premium')}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Crown className="w-8 h-8 text-white animate-pulse" />
+              <div>
+                <h3 className="text-white font-bold text-lg">Upgrade to Premium</h3>
+                <p className="text-white/90 text-sm">Unlock all features</p>
+              </div>
+            </div>
+            <ChevronRight className="w-6 h-6 text-white" />
+          </div>
+        </div>
+      )}
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 backdrop-blur-lg rounded-3xl p-6 border border-white/20 transform hover:scale-105 transition-all duration-300">
+          <Flame className="w-8 h-8 text-orange-400 mb-3" />
+          <p className="text-sm text-gray-300 mb-1">Calories Today</p>
+          <p className="text-3xl font-bold text-white">{totalCalories}</p>
+          <p className="text-xs text-gray-400 mt-1">of {dailyGoal} goal</p>
+        </div>
+        <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-lg rounded-3xl p-6 border border-white/20 transform hover:scale-105 transition-all duration-300">
+          <Dumbbell className="w-8 h-8 text-red-400 mb-3" />
+          <p className="text-sm text-gray-300 mb-1">Workouts</p>
+          <p className="text-3xl font-bold text-white">{completedWorkouts.length}</p>
+          <p className="text-xs text-gray-400 mt-1">completed today</p>
+        </div>
+      </div>
+
+      {/* Water Intake */}
+      <div className="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-cyan-500/30 rounded-2xl flex items-center justify-center">
+              <span className="text-2xl">💧</span>
+            </div>
+            <div>
+              <h3 className="text-white font-bold">Water Intake</h3>
+              <p className="text-gray-300 text-sm">{waterIntake} ml / 2000 ml</p>
+            </div>
+          </div>
+          <button onClick={addWater} className="bg-cyan-500 hover:bg-cyan-600 text-white font-bold px-4 py-2 rounded-xl transition-all">
+            +250ml
+          </button>
+        </div>
+        <div className="w-full bg-white/10 rounded-full h-3">
+          <div className="bg-gradient-to-r from-cyan-400 to-blue-500 h-3 rounded-full transition-all duration-500" style={{width: `${Math.min((waterIntake/2000)*100, 100)}%`}}></div>
+        </div>
+      </div>
+
+      {/* Progress Circle */}
+      <div className="bg-gradient-to-br from-red-500/10 to-orange-500/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+          <Target className="w-6 h-6 text-red-400" />
+          Daily Goal Progress
+        </h2>
+        <div className="relative w-48 h-48 mx-auto">
+          <svg className="transform -rotate-90 w-48 h-48">
+            <circle cx="96" cy="96" r="88" stroke="currentColor" strokeWidth="12" fill="none" className="text-white/10" />
+            <circle
+              cx="96" cy="96" r="88" stroke="url(#gradient)" strokeWidth="12" fill="none"
+              strokeDasharray={`${2 * Math.PI * 88}`}
+              strokeDashoffset={`${2 * Math.PI * 88 * (1 - Math.min(progress / 100, 1))}`}
+              className="transition-all duration-1000 ease-out" strokeLinecap="round"
+            />
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ef4444" />
+                <stop offset="50%" stopColor="#f97316" />
+                <stop offset="100%" stopColor="#ef4444" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-5xl font-bold text-white">{Math.round(progress)}%</span>
+            <span className="text-sm text-gray-300 mt-1">Complete</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 gap-4">
+        <button
+          onClick={() => setCurrentPage('nutrition')}
+          className="bg-gradient-to-br from-orange-500 to-red-500 text-white font-bold py-6 px-4 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex flex-col items-center gap-2"
+        >
+          <Flame className="w-8 h-8" />
+          <span>Log Food</span>
+        </button>
+        <button
+          onClick={() => setCurrentPage('workouts')}
+          className="bg-gradient-to-br from-red-500 to-orange-600 text-white font-bold py-6 px-4 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex flex-col items-center gap-2"
+        >
+          <Dumbbell className="w-8 h-8" />
+          <span>Start Workout</span>
+        </button>
+      </div>
+    </div>
+  );
+
+  // Nutrition Page
+  const NutritionPage = () => (
+    <div className="space-y-6 pb-24">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-3xl font-bold text-white">Nutrition</h2>
+        <div className="bg-white/10 backdrop-blur-lg rounded-xl px-4 py-2 border border-white/20">
+          <p className="text-sm text-gray-300">Goal: {dailyGoal} cal</p>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
+          <Target className="w-6 h-6 text-red-400 mb-2" />
+          <p className="text-xs text-gray-300 mb-1">Goal</p>
+          <p className="text-lg font-bold text-white">{dailyGoal}</p>
+        </div>
+        <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
+          <Zap className="w-6 h-6 text-orange-400 mb-2" />
+          <p className="text-xs text-gray-300 mb-1">Eaten</p>
+          <p className="text-lg font-bold text-white">{totalCalories}</p>
+        </div>
+        <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
+          <Award className="w-6 h-6 text-emerald-400 mb-2" />
+          <p className="text-xs text-gray-300 mb-1">Left</p>
+          <p className={`text-lg font-bold ${remaining >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+            {Math.abs(remaining)}
+          </p>
+        </div>
+      </div>
+
+      {/* Quick Log Buttons */}
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={() => setShowForm(true)} className="bg-gradient-to-r from-red-500 to-orange-500 text-white font-bold py-4 px-4 rounded-2xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-center gap-2">
+          <Plus className="w-5 h-5" />
+          Add Food
+        </button>
+        <button onClick={() => setShowPhotoOption(true)} className="bg-gradient-to-r from-orange-500 to-red-600 text-white font-bold py-4 px-4 rounded-2xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-center gap-2">
+          <Camera className="w-5 h-5" />
+          Take Photo
+        </button>
+      </div>
+
+      {/* Photo Option Modal */}
+      {showPhotoOption && (
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 shadow-2xl">
+          <h3 className="text-xl font-bold text-white mb-4">Photo Food Logging</h3>
+          <div className="space-y-4">
+            <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-2xl p-6 border border-red-500/30 text-center">
+              <Camera className="w-16 h-16 text-white mx-auto mb-4" />
+              <p className="text-white font-medium mb-2">Take a photo of your meal</p>
+              <p className="text-sm text-gray-300 mb-4">AI will automatically detect food and calories</p>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                id="camera-input"
+                onChange={() => {
+                  setFoodName('Photo Meal');
+                  setCalories('350');
+                  setShowPhotoOption(false);
+                  setShowForm(true);
+                }}
+              />
+              <label
+                htmlFor="camera-input"
+                className="inline-block bg-white text-black font-bold py-3 px-6 rounded-xl cursor-pointer hover:bg-gray-100 transition-all"
+              >
+                Open Camera
+              </label>
+            </div>
+            <button
+              onClick={() => setShowPhotoOption(false)}
+              className="w-full bg-white/10 text-white font-bold py-3 rounded-xl border border-white/20 transform hover:scale-105 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Form */}
+      {showForm && (
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 shadow-2xl">
+          <h3 className="text-xl font-bold text-white mb-4">Log Your Meal</h3>
+          <div className="space-y-4">
+            <input
+              type="text"
+              value={foodName}
+              onChange={(e) => setFoodName(e.target.value)}
+              placeholder="What did you eat?"
+              className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+            />
+            <input
+              type="number"
+              value={calories}
+              onChange={(e) => setCalories(e.target.value)}
+              placeholder="Calories"
+              className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500"
+            />
+            <select
+              value={mealType}
+              onChange={(e) => setMealType(e.target.value)}
+              className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="breakfast" className="bg-black">🌅 Breakfast</option>
+              <option value="lunch" className="bg-black">☀️ Lunch</option>
+              <option value="dinner" className="bg-black">🌙 Dinner</option>
+              <option value="snack" className="bg-black">🍎 Snack</option>
+            </select>
+            <div className="flex gap-3">
+              <button
+                onClick={addMeal}
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-3 rounded-xl transform hover:scale-105 transition-all"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setShowForm(false);
+                  setShowPhotoOption(false);
+                }}
+                className="flex-1 bg-white/10 text-white font-bold py-3 rounded-xl border border-white/20 transform hover:scale-105 transition-all"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Meals List */}
+      <div className="space-y-3">
+        <h3 className="text-lg font-bold text-white">Today's Meals</h3>
+        {meals.length === 0 ? (
+          <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-12 border border-white/10 text-center">
+            <div className="text-6xl mb-4">🍽️</div>
+            <p className="text-gray-300 font-medium">No meals logged yet</p>
+            <p className="text-sm text-gray-400 mt-2">Start tracking your nutrition!</p>
+          </div>
+        ) : (
+          meals.map((meal) => (
+            <div key={meal.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20 transform hover:scale-102 transition-all">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 bg-gradient-to-br ${getMealColor(meal.type)} rounded-xl flex items-center justify-center text-2xl shadow-lg`}>
+                    {getMealEmoji(meal.type)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">{meal.name}</h3>
+                    <p className="text-xs text-gray-400 capitalize">{meal.type} • {meal.time}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-white">{meal.calories}</p>
+                    <p className="text-xs text-gray-400">cal</p>
+                  </div>
+                  <button
+                    onClick={() => deleteMeal(meal.id)}
+                    className="text-rose-400 hover:text-rose-300 transition-colors transform hover:scale-110"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  );
+
+  // Recipes Page
+  const RecipesPage = () => (
+    <div className="space-y-6 pb-24">
+      <h2 className="text-3xl font-bold text-white mb-6">Healthy Recipes</h2>
+      <div className="grid grid-cols-2 gap-4">
+        {recipes.map((recipe) => (
+          <div key={recipe.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20 transform hover:scale-105 transition-all cursor-pointer">
+            <div className="text-5xl mb-3 text-center">{recipe.image}</div>
+            <h3 className="text-white font-semibold text-sm mb-2">{recipe.name}</h3>
+            <div className="flex items-center justify-between text-xs text-gray-300 mb-2">
+              <span className="flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {recipe.time}
+              </span>
+              <span className="font-bold text-orange-400">{recipe.calories} cal</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1 text-xs">
+              <div className="bg-white/5 rounded px-2 py-1 text-center">
+                <p className="text-gray-400">P</p>
+                <p className="text-white font-bold">{recipe.protein}g</p>
+              </div>
+              <div className="bg-white/5 rounded px-2 py-1 text-center">
+                <p className="text-gray-400">C</p>
+                <p className="text-white font-bold">{recipe.carbs}g</p>
+              </div>
+              <div className="bg-white/5 rounded px-2 py-1 text-center">
+                <p className="text-gray-400">F</p>
+                <p className="text-white font-bold">{recipe.fat}g</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Meal Plans Page
+  const MealPlansPage = () => (
+    <div className="space-y-6 pb-24">
+      <h2 className="text-3xl font-bold text-white mb-6">Meal Plans</h2>
+      <div className="space-y-4">
+        {mealPlans.map((plan) => (
+          <div key={plan.id} className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 transform hover:scale-102 transition-all cursor-pointer">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">{plan.image}</div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-1">{plan.name}</h3>
+                  <p className="text-sm text-gray-300 mb-2">{plan.description}</p>
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <Flame className="w-4 h-4" />
+                    <span>{plan.calories} calories/day</span>
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="w-6 h-6 text-gray-400" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Progress Page
+  const ProgressPage = () => (
+    <div className="space-y-6 pb-24">
+      <h2 className="text-3xl font-bold text-white mb-6">Your Progress</h2>
+      
+      {/* Weight Tracking */}
+      <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
+        <div className="flex items-center gap-3 mb-4">
+          <Activity className="w-6 h-6 text-red-400" />
+          <h3 className="text-xl font-bold text-white">Weight Tracker</h3>
+        </div>
+        <div className="bg-white/5 rounded-2xl p-8 text-center">
+          <p className="text-6xl font-bold text-white mb-2">{userData.weight || '--'}</p>
+          <p className="text-gray-300 mb-1">kg</p>
+          <p className="text-sm text-gray-400">Goal: {userData.targetWeight || '--'} kg</p>
+          <button className="mt-4 bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-2 rounded-xl font-semibold">
+            Log Weight
+          </button>
+        </div>
+      </div>
+
+      {/* Streak */}
+      <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-white font-bold text-lg mb-1">Current Streak</h3>
+            <p className="text-gray-300 text-sm">Keep up the great work!</p>
+          </div>
+          <div className="text-center">
+            <p className="text-5xl font-bold text-white">7</p>
+            <p className="text-sm text-gray-300">days</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Achievements */}
+      <div className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
+        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <Award className="w-6 h-6 text-emerald-400" />
+          Achievements
+        </h3>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-white/5 rounded-xl p-4 text-center">
+            <div className="text-3xl mb-2">🔥</div>
+            <p className="text-xs text-gray-300">7 Day Streak</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 text-center">
+            <div className="text-3xl mb-2">💪</div>
+            <p className="text-xs text-gray-300">10 Workouts</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 text-center opacity-50">
+            <div className="text-3xl mb-2">🏆</div>
+            <p className="text-xs text-gray-300">Goal Master</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Weekly Summary */}
+      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
+        <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+          <BarChart3 className="w-6 h-6 text-red-400" />
+          This Week
+        </h3>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-300">Avg Calories</span>
+            <span className="text-white font-bold">1,950 cal</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-300">Workouts Completed</span>
+            <span className="text-white font-bold">{completedWorkouts.length}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-gray-300">Days Logged</span>
+            <span className="text-white font-bold">7/7</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // Workouts Page
+  const WorkoutsPage = () => (
+    <div className="space-y-6 pb-24">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-3xl font-bold text-white">Workouts</h2>
+        <div className="bg-white/10 backdrop-blur-lg rounded-xl px-4 py-2 border border-white/20">
+          <p className="text-sm text-gray-300">{completedWorkouts.length} completed</p>
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        {workoutPlans.map((workout) => (
+          <div
+            key={workout.id}
+            onClick={() => setSelectedWorkout(workout)}
+            className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 transform hover:scale-102 transition-all cursor-pointer hover:bg-white/15"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">{workout.image}</div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-1">{workout.name}</h3>
+                  <div className="flex items-center gap-3 text-sm text-gray-300">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-4 h-4" />
+                      {workout.duration}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Flame className="w-4 h-4" />
+                      {workout.calories}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="w-6 h-6 text-gray-400" />
+            </div>
+            <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold border ${getDifficultyColor(workout.difficulty)}`}>
+              {workout.difficulty}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Workout Detail Page
+  const WorkoutDetailPage = () => {
+    if (!selectedWorkout) return null;
+
+    return (
+      <div className="space-y-6 pb-24">
+        <button
+          onClick={() => setSelectedWorkout(null)}
+          className="text-gray-300 hover:text-white transition-colors mb-4"
+        >
+          ← Back to Workouts
+        </button>
+
+        <div className="bg-gradient-to-br from-red-500/20 to-orange-500/20 backdrop-blur-lg rounded-3xl p-8 border border-white/20">
+          <div className="text-center mb-6">
+            <div className="text-7xl mb-4">{selectedWorkout.image}</div>
+            <h2 className="text-3xl font-bold text-white mb-3">{selectedWorkout.name}</h2>
+            <div className="flex items-center justify-center gap-4 text-gray-300 mb-4">
+              <span className="flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                {selectedWorkout.duration}
+              </span>
+              <span className="flex items-center gap-2">
+                <Flame className="w-5 h-5" />
+                {selectedWorkout.calories}
+              </span>
+            </div>
+            <div className={`inline-block px-4 py-2 rounded-full text-sm font-semibold border ${getDifficultyColor(selectedWorkout.difficulty)}`}>
+              {selectedWorkout.difficulty}
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
+          <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-red-400" />
+            Exercises
+          </h3>
+          <div className="space-y-3">
+            {selectedWorkout.exercises.map((exercise, index) => (
+              <div key={index} className="bg-white/5 rounded-2xl p-4 border border-white/10 hover:bg-white/10 transition-all">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-500 rounded-xl flex items-center justify-center text-white font-bold">
+                      {index + 1}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-white">{exercise.name}</h4>
+                      <p className="text-sm text-gray-400">{exercise.sets}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400">Rest</p>
+                    <p className="text-sm font-semibold text-white">{exercise.rest}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            completeWorkout(selectedWorkout.id);
+            setSelectedWorkout(null);
+            setCurrentPage('workouts');
+          }}
+          className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold py-5 px-6 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
+        >
+          <Play className="w-6 h-6" />
+          Start Workout
+        </button>
+      </div>
+    );
+  };
+
+  // Premium Page
+  const PremiumPage = () => (
+    <div className="space-y-6 pb-24">
+      <div className="text-center mb-8">
+        <div className="inline-block p-4 bg-gradient-to-br from-orange-400 via-red-500 to-orange-600 rounded-3xl shadow-2xl mb-4 animate-pulse">
+          <Crown className="w-12 h-12 text-white" />
+        </div>
+        <h1 className="text-4xl font-bold text-white mb-2">Go Premium</h1>
+        <p className="text-gray-300">Unlock all features and reach your goals faster</p>
+      </div>
+
+      {/* Free vs Premium */}
+      <div className="space-y-4">
+        <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20">
+          <h3 className="text-2xl font-bold text-white mb-4">Free Features</h3>
+          <ul className="space-y-3">
+            <li className="flex items-center gap-3 text-gray-300">
+              <div className="w-6 h-6 bg-emerald-500/30 rounded-full flex items-center justify-center">✓</div>
+              <span>Basic calorie tracking</span>
+            </li>
+            <li className="flex items-center gap-3 text-gray-300">
+              <div className="w-6 h-6 bg-emerald-500/30 rounded-full flex items-center justify-center">✓</div>
+              <span>Photo food logging</span>
+            </li>
+            <li className="flex items-center gap-3 text-gray-300">
+              <div className="w-6 h-6 bg-emerald-500/30 rounded-full flex items-center justify-center">✓</div>
+              <span>6 workout plans</span>
+            </li>
+            <li className="flex items-center gap-3 text-gray-300">
+              <div className="w-6 h-6 bg-emerald-500/30 rounded-full flex items-center justify-center">✓</div>
+              <span>Water intake tracker</span>
+            </li>
+            <li className="flex items-center gap-3 text-gray-300">
+              <div className="w-6 h-6 bg-emerald-500/30 rounded-full flex items-center justify-center">✓</div>
+              <span>Basic progress tracking</span>
+            </li>
+            <li className="flex items-center gap-3 text-gray-300">
+              <div className="w-6 h-6 bg-emerald-500/30 rounded-full flex items-center justify-center">✓</div>
+              <span>6 healthy recipes</span>
+            </li>
+          </ul>
+        </div>
+
+        <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-lg rounded-3xl p-6 border-2 border-orange-400/50">
+          <div className="flex items-center gap-2 mb-4">
+            <Crown className="w-6 h-6 text-orange-400" />
+            <h3 className="text-2xl font-bold text-white">Premium Features</h3>
+          </div>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">Barcode scanner for instant food logging</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">AI-powered meal suggestions</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">Custom meal plans tailored to you</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">Advanced workout tracking & analytics</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">1000+ premium recipes</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">Macro & micronutrient breakdown</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">Integration with fitness devices</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">Detailed progress reports & charts</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">Personal training recommendations</span>
+            </li>
+            <li className="flex items-center gap-3 text-white">
+              <div className="w-6 h-6 bg-orange-400 rounded-full flex items-center justify-center text-black font-bold">✓</div>
+              <span className="font-medium">Ad-free experience</span>
+            </li>
+          </ul>
+
+          <div className="bg-white/10 rounded-2xl p-4 mb-4">
+            <div className="flex items-baseline justify-center gap-2 mb-2">
+              <span className="text-5xl font-bold text-white">$9.99</span>
+              <span className="text-gray-300">/month</span>
+            </div>
+            <p className="text-center text-sm text-gray-300">or $79.99/year (save 33%)</p>
+          </div>
+
+          <button
+            onClick={() => setIsPremium(true)}
+            className="w-full bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3"
+          >
+            <Crown className="w-6 h-6" />
+            Upgrade to Premium
+          </button>
+        </div>
+      </div>
+
+      <div className="text-center text-sm text-gray-400">
+        <p>7-day free trial • Cancel anytime</p>
+      </div>
+    </div>
+  );
+
+  // Profile Page
+  const ProfilePage = () => (
+    <div className="space-y-6 pb-24">
+      <div className="text-center mb-8">
+        <div className="w-24 h-24 bg-gradient-to-br from-red-500 to-orange-500 rounded-full mx-auto mb-4 flex items-center justify-center text-4xl">
+          👤
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-1">Your Profile</h2>
+        <p className="text-gray-300">Manage your fitness journey</p>
+      </div>
+
+      <div className="space-y-4">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
+          <label className="block text-sm text-gray-300 mb-2">Daily Calorie Goal</label>
+          <input
+            type="number"
+            value={dailyGoal}
+            onChange={(e) => setDailyGoal(parseInt(e.target.value) || 0)}
+            className="w-full px-4 py-3 bg-black/30 border border-white/20 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-4 border border-white/20">
+          <h3 className="text-white font-bold mb-3">Account Settings</h3>
+          <div className="space-y-3">
+            <button className="w-full text-left px-4 py-3 bg-white/5 rounded-xl text-gray-300 hover:bg-white/10 transition-all flex items-center justify-between">
+              <span>Edit Profile</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <button className="w-full text-left px-4 py-3 bg-white/5 rounded-xl text-gray-300 hover:bg-white/10 transition-all flex items-center justify-between">
+              <span>Notification Settings</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+            <button className="w-full text-left px-4 py-3 bg-white/5 rounded-xl text-gray-300 hover:bg-white/10 transition-all flex items-center justify-between">
+              <span>Privacy & Security</span>
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {isPremium ? (
+          <div className="bg-gradient-to-r from-orange-500/20 to-red-500/20 backdrop-blur-lg rounded-2xl p-6 border border-orange-400/30">
+            <div className="flex items-center gap-3 mb-2">
+              <Crown className="w-6 h-6 text-orange-400" />
+              <h3 className="text-white font-bold">Premium Member</h3>
+            </div>
+            <p className="text-sm text-gray-300">You have access to all premium features!</p>
+          </div>
+        ) : (
+          <button
+            onClick={() => setCurrentPage('premium')}
+            className="w-full bg-gradient-to-r from-orange-400 via-red-500 to-orange-600 text-white font-bold py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 transition-all flex items-center justify-center gap-3"
+          >
+            <Crown className="w-6 h-6" />
+            Upgrade to Premium
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-96 h-96 bg-red-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
+        <div className="absolute top-40 right-10 w-96 h-96 bg-orange-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute bottom-20 left-1/3 w-96 h-96 bg-red-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
+      <div className="relative z-10 max-w-md mx-auto p-4 pt-8">
+        {currentPage === 'onboarding' ? (
+          <OnboardingPage />
+        ) : selectedWorkout ? (
+          <WorkoutDetailPage />
+        ) : (
+          <>
+            {currentPage === 'home' && <HomePage />}
+            {currentPage === 'nutrition' && <NutritionPage />}
+            {currentPage === 'recipes' && <RecipesPage />}
+            {currentPage === 'mealplans' && <MealPlansPage />}
+            {currentPage === 'workouts' && <WorkoutsPage />}
+            {currentPage === 'progress' && <ProgressPage />}
+            {currentPage === 'premium' && <PremiumPage />}
+            {currentPage === 'profile' && <ProfilePage />}
+          </>
+        )}
+      </div>
+
+      {/* Bottom Navigation */}
+      {currentPage !== 'onboarding' && !selectedWorkout && (
+        <div className="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/10 z-50">
+          <div className="max-w-md mx-auto px-4 py-3">
+            <div className="flex items-center justify-around">
+              <button
+                onClick={() => setCurrentPage('home')}
+                className={`flex flex-col items-center gap-1 transition-all ${
+                  currentPage === 'home' ? 'text-red-400 scale-110' : 'text-gray-400'
+                }`}
+              >
+                <Home className="w-6 h-6" />
+                <span className="text-xs font-medium">Home</span>
+              </button>
+              <button
+                onClick={() => setCurrentPage('nutrition')}
+                className={`flex flex-col items-center gap-1 transition-all ${
+                  currentPage === 'nutrition' ? 'text-red-400 scale-110' : 'text-gray-400'
+                }`}
+              >
+                <Flame className="w-6 h-6" />
+                <span className="text-xs font-medium">Food</span>
+              </button>
+              <button
+                onClick={() => setCurrentPage('recipes')}
+                className={`flex flex-col items-center gap-1 transition-all ${
+                  currentPage === 'recipes' || currentPage === 'mealplans' ? 'text-red-400 scale-110' : 'text-gray-400'
+                }`}
+              >
+                <BookOpen className="w-6 h-6" />
+                <span className="text-xs font-medium">Recipes</span>
+              </button>
+              <button
+                onClick={() => setCurrentPage('workouts')}
+                className={`flex flex-col items-center gap-1 transition-all ${
+                  currentPage === 'workouts' ? 'text-red-400 scale-110' : 'text-gray-400'
+                }`}
+              >
+                <Dumbbell className="w-6 h-6" />
+                <span className="text-xs font-medium">Workout</span>
+              </button>
+              <button
+                onClick={() => setCurrentPage('progress')}
+                className={`flex flex-col items-center gap-1 transition-all ${
+                  currentPage === 'progress' ? 'text-red-400 scale-110' : 'text-gray-400'
+                }`}
+              >
+                <BarChart3 className="w-6 h-6" />
+                <span className="text-xs font-medium">Progress</span>
+              </button>
+              <button
+                onClick={() => setCurrentPage('profile')}
+                className={`flex flex-col items-center gap-1 transition-all ${
+                  currentPage === 'profile' || currentPage === 'premium' ? 'text-red-400 scale-110' : 'text-gray-400'
+                }`}
+              >
+                <User className="w-6 h-6" />
+                <span className="text-xs font-medium">Profile</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slide-in {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out;
+        }
+        .animate-slide-in {
+          animation: slide-in 0.4s ease-out;
+        }
+      `}</style>
+    </div>
+  );
+}
